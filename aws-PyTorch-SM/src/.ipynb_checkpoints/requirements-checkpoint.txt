@@ -1,0 +1,12 @@
+boto3==1.16.28
+numpy==1.18.4
+sagemaker==2.17.0
+sagemaker-training==3.6.3.post0
+scipy
+scikit-learn
+smdebug==0.9.5
+statsmodels==0.12.1
+tensorboard==2.4.0
+torch==1.6.0
+torchvision==0.7.0
+tqdm==4.51.0
