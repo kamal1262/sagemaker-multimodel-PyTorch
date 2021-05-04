@@ -1,0 +1,5 @@
+# We provide a template .tpl file instead:
+container/Dockerfile
+
+# This is pulled through from src/:
+container/requirements.txt
