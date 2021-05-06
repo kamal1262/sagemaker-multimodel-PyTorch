@@ -1,3 +1,7 @@
+# Project-specific:
+**/data/model/
+**/data/torchserve-models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
