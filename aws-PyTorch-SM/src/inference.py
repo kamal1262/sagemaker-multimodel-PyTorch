@@ -18,7 +18,7 @@ from model import SkipGram
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-VOCAB_SIZE = 628
+# VOCAB_SIZE = 628
 EMB_SIZE = 128
 torch.manual_seed(1368)
 
@@ -47,8 +47,9 @@ def input_fn(request_body, content_type):
         logging.info(f"Inference request json body: {input_data}")
         
         params = {}
-        # params['locationIDInput'] = [ loc2id_dict[input_d] for input_d in input_data['locationIDInput'] ]
+#         params['locationIDInput'] = [ loc2id_dict[input_d] for input_d in input_data['locationIDInput'] ]
         params['locationIDInput'] = [ input_d for input_d in input_data['locationIDInput'] ]
+
         params['count'] = input_data['count'] if 'count' in input_data else 5;
     else:
         raise Exception(
@@ -56,9 +57,22 @@ def input_fn(request_body, content_type):
         )
     return params
 
+
+
 def model_fn(model_dir):
-    print('declare the model now')
+    print('loading the model artefacts.......')
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    with open(os.path.join(model_dir, 'model_checkpoint.pth'), 'rb') as f:
+        model_checkpoint= torch.load(f, map_location=device)
+        
+    loc2idx = model_checkpoint['loc2idx']
+    idx2loc = model_checkpoint['idx2loc']
+    logger.info(f'loc2idx loaded from checkpoint file, length of dic {len(loc2idx)}')
+    
+    VOCAB_SIZE = len(loc2idx)
+    
+    print('declare the model now')
     model = SkipGram(VOCAB_SIZE, EMB_SIZE).to(device)
     
     print('loading the model .....')
@@ -70,14 +84,9 @@ def model_fn(model_dir):
 
     model.to(device).eval()
 
-    print('loading the model artefacts.......')
-    with open(os.path.join(model_dir, 'model_checkpoint.pth'), 'rb') as f:
-        model_checkpoint= torch.load(f, map_location=device)
-    loc2idx = model_checkpoint['loc2idx']
-    idx2loc = model_checkpoint['idx2loc']
-    logger.info(f'loc2idx loaded from checkpoint file, length of dic {len(loc2idx)}')
-    
-    return {"model": model.eval(),"loc2idx": loc2idx, "idx2loc": idx2loc }
+    return {"model": model,"loc2idx": loc2idx, "idx2loc": idx2loc }
+
+
 
 def predict_fn(input_data, model_artifact):
     model = model_artifact['model']
